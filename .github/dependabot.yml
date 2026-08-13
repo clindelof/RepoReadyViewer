@@ -1,10 +1,36 @@
 version: 2
+
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: monthly
+    open-pull-requests-limit: 2
+    groups:
+      angular-maintenance:
+        patterns:
+          - "@angular/*"
+        update-types:
+          - minor
+          - patch
+      npm-maintenance:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@angular/*"
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    groups:
+      actions-maintenance:
+        patterns:
+          - "*"
