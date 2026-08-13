@@ -1,0 +1,6 @@
+* { box-sizing: border-box; }
+html { min-width: 320px; background: #07100e; }
+body { margin: 0; font-family: 'Aptos', 'Segoe UI', system-ui, sans-serif; }
+button, input { font: inherit; }
+button, a, label { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, label:has(input:focus-visible) { outline: 3px solid #f0b85b; outline-offset: 3px; }

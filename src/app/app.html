@@ -1,0 +1,128 @@
+<div class="app-shell" [class.light]="!darkMode()">
+  <header class="topbar">
+    <a class="brand" href="#main" aria-label="RepoReady Viewer home">
+      <img class="brand-mark" [src]="darkMode() ? 'repoready-viewer-logo-dark.png' : 'repoready-viewer-logo.png'" alt="" aria-hidden="true" />
+      <span>
+        <strong>RepoReady</strong>
+        <small>Viewer</small>
+      </span>
+    </a>
+    <div class="top-actions">
+      <span class="privacy-note"><span aria-hidden="true">●</span> Local processing only</span>
+      <button class="icon-button" type="button" (click)="toggleTheme()" [attr.aria-label]="darkMode() ? 'Use light theme' : 'Use dark theme'">
+        <span aria-hidden="true">{{ darkMode() ? '☼' : '☾' }}</span>
+      </button>
+      <a class="github-link" href="https://github.com/clindelof/RepoReady" target="_blank" rel="noreferrer">RepoReady CLI ↗</a>
+    </div>
+  </header>
+
+  <main id="main">
+    @if (!store.report()) {
+      <section class="welcome" aria-labelledby="welcome-title">
+        <div class="eyebrow">PRIVATE BY DESIGN</div>
+        <h1 id="welcome-title">See what stands between<br />your repository and public.</h1>
+        <p class="welcome-copy">Open a RepoReady JSON or SARIF report to turn publication findings into a clear, actionable review. Your file never leaves this browser.</p>
+
+        <div
+          class="drop-zone"
+          [class.dragging]="dragging()"
+          (dragover)="$event.preventDefault(); dragging.set(true)"
+          (dragleave)="dragging.set(false)"
+          (drop)="onDrop($event)"
+        >
+          <div class="drop-icon" aria-hidden="true">⇧</div>
+          <h2>Drop a report here</h2>
+          <p>RepoReady JSON or SARIF · processed locally</p>
+          <label class="primary-button">
+            Choose report
+            <input type="file" accept=".json,.sarif,application/json" (change)="openFile($any($event.target).files?.[0])" />
+          </label>
+          <button class="text-button" type="button" (click)="loadSample()">Explore a synthetic sample →</button>
+        </div>
+
+        @if (store.error()) {
+          <div class="error-message" role="alert">{{ store.error() }}</div>
+        }
+
+        <div class="value-grid">
+          <article><span>01</span><h3>Import privately</h3><p>Files stay on your device. No upload, account, or tracking.</p></article>
+          <article><span>02</span><h3>Prioritize clearly</h3><p>Separate blockers from warnings and confirmed checks.</p></article>
+          <article><span>03</span><h3>Remediate confidently</h3><p>Review practical next steps without exposing secret values.</p></article>
+        </div>
+      </section>
+    } @else {
+      <section class="workspace" aria-label="Report workspace">
+        <div class="report-heading">
+          <div>
+            <button class="back-button" type="button" (click)="store.clear()">← Open another report</button>
+            <div class="eyebrow">{{ store.report()?.sourceFormat }}</div>
+            <h1>{{ store.report()?.repository }}</h1>
+            <p>{{ store.report()?.findings?.length }} checks reviewed <span>·</span> {{ store.report()?.suppressed }} baseline suppressions</p>
+          </div>
+          <div class="result-stamp" [attr.data-severity]="store.report()?.result">
+            <small>PUBLICATION STATUS</small>
+            <strong>{{ store.report()?.result }}</strong>
+          </div>
+        </div>
+
+        <div class="summary-grid">
+          @for (severity of ['BLOCK', 'WARN', 'PASS']; track severity) {
+            <button class="metric-card" type="button" [attr.data-severity]="severity" (click)="selectSeverity($any(severity))">
+              <span class="metric-label">{{ severity }}</span>
+              <strong>{{ countFor($any(severity)) }}</strong>
+              <span class="metric-bar"><i [style.width.%]="percent($any(severity))"></i></span>
+            </button>
+          }
+        </div>
+
+        <div class="report-layout">
+          <section class="findings-panel" aria-labelledby="findings-title">
+            <div class="panel-header">
+              <div><div class="eyebrow">REVIEW QUEUE</div><h2 id="findings-title">Findings</h2></div>
+              <span>{{ store.filteredFindings().length }} shown</span>
+            </div>
+
+            <div class="filters">
+              <label class="search-field"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search checks, messages, paths…" [ngModel]="store.query()" (ngModelChange)="store.query.set($event)" /></label>
+              <div class="filter-tabs" aria-label="Filter by severity">
+                @for (severity of severities; track severity) {
+                  <button type="button" [class.active]="store.severity() === severity" (click)="selectSeverity(severity)">{{ severity }} <span>{{ countFor(severity) }}</span></button>
+                }
+              </div>
+            </div>
+
+            <div class="finding-list">
+              @for (finding of store.filteredFindings(); track finding.id) {
+                <button class="finding-row" type="button" [class.selected]="store.selectedId() === finding.id" (click)="store.selectedId.set(finding.id)">
+                  <span class="severity-dot" [attr.data-severity]="finding.severity"></span>
+                  <span class="finding-copy"><strong>{{ finding.check }}</strong><span>{{ finding.message }}</span></span>
+                  @if (finding.location) { <code>{{ finding.location }}</code> }
+                  <span class="row-arrow" aria-hidden="true">›</span>
+                </button>
+              } @empty {
+                <div class="empty-results"><strong>No findings match.</strong><span>Try a different search or severity.</span></div>
+              }
+            </div>
+          </section>
+
+          <aside class="detail-panel" aria-live="polite">
+            @if (store.selected(); as finding) {
+              <div class="detail-top"><span class="severity-badge" [attr.data-severity]="finding.severity">{{ finding.severity }}</span><button type="button" (click)="store.selectedId.set(null)" aria-label="Close finding details">×</button></div>
+              <div class="eyebrow">FINDING DETAIL</div>
+              <h2>{{ finding.check }}</h2>
+              <p class="detail-message">{{ finding.message }}</p>
+              @if (finding.location) { <div class="detail-section"><small>LOCATION</small><code>{{ finding.location }}</code></div> }
+              @if (finding.remediation) { <div class="detail-section remediation"><small>RECOMMENDED NEXT STEP</small><p>{{ finding.remediation }}</p></div> }
+              @if (finding.fingerprint) { <div class="detail-section"><small>FINGERPRINT</small><code>{{ finding.fingerprint }}</code></div> }
+              <p class="redaction-note">RepoReady reports intentionally hide sensitive values and private paths.</p>
+            } @else {
+              <div class="detail-empty"><span aria-hidden="true">◎</span><strong>Select a finding</strong><p>Choose an item from the review queue to see its context and next step.</p></div>
+            }
+          </aside>
+        </div>
+      </section>
+    }
+  </main>
+
+  <footer><span>RepoReady Viewer</span><span>Reports stay in your browser.</span></footer>
+</div>

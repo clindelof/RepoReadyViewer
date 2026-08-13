@@ -1,0 +1,48 @@
+{
+  "repository": "demo/launchpad",
+  "result": "BLOCK",
+  "suppressed": 2,
+  "findings": [
+    {
+      "severity": "BLOCK",
+      "check": "history-sensitive-paths",
+      "message": "2 sensitive-looking paths remain in Git history; paths hidden",
+      "remediation": "Create clean history or use git-filter-repo, then rotate exposed credentials.",
+      "fingerprint": "demo-history-001"
+    },
+    {
+      "severity": "WARN",
+      "check": "security-policy",
+      "message": "No tracked security policy found",
+      "remediation": "Add SECURITY.md with private vulnerability reporting guidance.",
+      "location": "SECURITY.md",
+      "fingerprint": "demo-security-002"
+    },
+    {
+      "severity": "WARN",
+      "check": "dependabot",
+      "message": "No Dependabot configuration found",
+      "remediation": "Add .github/dependabot.yml for detected package ecosystems.",
+      "location": ".github/dependabot.yml",
+      "fingerprint": "demo-dependabot-003"
+    },
+    {
+      "severity": "PASS",
+      "check": "tracked-secrets",
+      "message": "No common secret patterns found in tracked content",
+      "fingerprint": "demo-secrets-004"
+    },
+    {
+      "severity": "PASS",
+      "check": "tests",
+      "message": "18 test files found",
+      "fingerprint": "demo-tests-005"
+    },
+    {
+      "severity": "PASS",
+      "check": "ci",
+      "message": "3 CI workflows found",
+      "fingerprint": "demo-ci-006"
+    }
+  ]
+}
