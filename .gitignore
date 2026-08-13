@@ -37,7 +37,7 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
-*.log
+.angular-serve*.log
 
 # System files
 .DS_Store
