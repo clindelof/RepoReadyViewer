@@ -1,6 +1,6 @@
 # RepoReady Viewer
 
-RepoReady Viewer is a private, browser-based Angular application for exploring RepoReady JSON and SARIF reports. Reports are parsed entirely on the user's device and are never uploaded.
+RepoReady Viewer is a privacy-first, browser-based Angular application for exploring RepoReady JSON and SARIF reports. Reports are parsed entirely on the user's device and are never uploaded.
 
 ## Features
 
